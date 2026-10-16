@@ -142,6 +142,14 @@ ul.b li::before{content:"·";color:var(--accent);font-weight:700;flex:none}
 .tr .nar{font-style:italic;color:var(--fg-muted);font-size:.82rem}
 .tr .note{color:var(--accent);font-size:.8rem;margin-top:2px}
 
+/* figures (cropped from the original manuals) */
+.figures{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.figures .flabel{font-size:.72rem;color:var(--fg-faint);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+figure.fig{margin:0;background:var(--surface);border:1px solid var(--border);border-radius:13px;
+  padding:14px;display:flex;flex-direction:column;gap:10px;align-items:center}
+figure.fig img{max-width:100%;height:auto;background:#fff;padding:8px;border-radius:8px;border:1px solid var(--border)}
+figure.fig figcaption{font-size:.78rem;color:var(--fg-muted);line-height:1.55;align-self:stretch}
+
 /* interactive */
 .field{display:flex;flex-direction:column;gap:7px}
 .field label{font-size:.88rem;font-weight:500}
@@ -213,6 +221,7 @@ textarea:focus,.rowinput:focus{outline:2px solid var(--accent);outline-offset:-1
 <main id="main"></main>
 
 <script src="content.js"></script>
+<script src="figures.js"></script>
 <script>
 "use strict";
 var TOOLS = (window.QR_CONTENT || []);
@@ -340,6 +349,18 @@ function renderChapter(t,c){
   var box=h("div","content");
   c.elements.forEach(function(e){box.appendChild(renderEl(e))});
   main.appendChild(box);
+  var figs=(window.QR_FIGURES||{})[c.id];
+  if(figs&&figs.length){
+    var fw=h("div","figures");fw.appendChild(h("div","flabel","원본 매뉴얼 도판"));
+    figs.forEach(function(f){
+      var fig=document.createElement("figure");fig.className="fig";
+      var img=document.createElement("img");img.src=f.src;img.alt=f.cap||"";img.loading="lazy";
+      fig.appendChild(img);
+      if(f.cap){var cap=document.createElement("figcaption");cap.textContent=f.cap;fig.appendChild(cap);}
+      fw.appendChild(fig);
+    });
+    main.appendChild(fw);
+  }
 }
 
 function renderEl(e){
