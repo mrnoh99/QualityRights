@@ -40,6 +40,25 @@
 - `ObservableObject` 상태 관리 + `UserDefaults` 영속화 (오프라인·프라이버시 우선)
 - Xcode 16의 *file-system synchronized group* 프로젝트 형식
 
+## 웹앱 (브라우저 버전)
+
+5종 도구 + 도입 가이드라인을 **하나의 브라우저 웹앱**으로도 제공합니다. 설치 없이
+링크만으로 열람·작성할 수 있고, 입력한 토론·성찰 답변은 각 브라우저에 로컬 저장됩니다.
+
+```
+web/
+├─ index.html      단일 페이지 웹앱 (반응형 · 라이트/다크 · 로컬 자동저장)
+└─ content.js      5종 도구 + 가이드라인 콘텐츠 데이터
+```
+
+- **바로 보기**: `web/index.html`을 브라우저로 열면 됩니다.
+- **GitHub Pages 배포**: 저장소 Settings → Pages에서 이 브랜치의 `/web` 폴더를
+  소스로 지정하면 공개 URL로 호스팅됩니다.
+- **콘텐츠 재생성**: iOS 앱과 동일한 `src/` 콘텐츠로부터 자동 변환됩니다.
+  ```bash
+  python3 tools/web-content.py src > web/content.js
+  ```
+
 ## 저장소 구조
 
 ```
@@ -48,10 +67,12 @@ qualityrights/
 │  ├─ engine/                   앱 공통 엔진 (Model·Store·Theme·Views·공통 Content)
 │  └─ tools/                    도구별 콘텐츠 5종 + 도입 가이드라인
 ├─ tools/
-│  ├─ scaffold.sh              src/ 로부터 5개 앱을 생성/동기화
+│  ├─ scaffold.sh              src/ 로부터 5개 iOS 앱을 생성/동기화
+│  ├─ web-content.py           src/ 로부터 웹앱 콘텐츠(content.js) 생성
 │  └─ project.pbxproj.tmpl     Xcode 프로젝트 템플릿
-└─ apps/                        생성된 5개의 독립 Xcode 앱 (열어서 바로 빌드)
-   ├─ OpenDialogue/ · DOTP/ · Stabilization/ · Recovery/ · SupportedDecision/
+├─ apps/                        생성된 5개의 독립 Xcode 앱 (열어서 바로 빌드)
+│  └─ OpenDialogue/ · DOTP/ · Stabilization/ · Recovery/ · SupportedDecision/
+└─ web/                         브라우저 웹앱 (index.html + content.js)
 ```
 
 앱 코드는 **손으로 중복 관리하지 않습니다.** 공통 엔진과 도구 콘텐츠는 `src/`에

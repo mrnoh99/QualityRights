@@ -1,0 +1,461 @@
+<title>인권중심 중재기술</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: app shell — sticky header + tab bar, single scrolling column that
+   swaps between home (tool cards) · tool (chapter list) · chapter (content). */
+:root{
+  --bg:#f6f5f2; --surface:#ffffff; --surface-2:#efece6; --raise:#fbfaf7;
+  --fg:#211f1c; --fg-muted:#6b6760; --fg-faint:#908b82;
+  --border:#e4e0d8; --border-strong:#d3cec3;
+  --accent:#44607f; --accent-soft:rgba(68,96,127,.12);
+  --warm:#f3ead4; --danger:#b4524a;
+  --serif:"Noto Serif KR",Georgia,"Apple SD Gothic Neo",serif;
+  --sans:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --maxw:760px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#19181a; --surface:#242225; --surface-2:#2c2a2d; --raise:#2a282b;
+  --fg:#ececea; --fg-muted:#a9a49d; --fg-faint:#827d77;
+  --border:#38353a; --border-strong:#47434a;
+  --accent-soft:rgba(255,255,255,.08); --warm:#322c20; --danger:#d98078;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#19181a; --surface:#242225; --surface-2:#2c2a2d; --raise:#2a282b;
+  --fg:#ececea; --fg-muted:#a9a49d; --fg-faint:#827d77;
+  --border:#38353a; --border-strong:#47434a;
+  --accent-soft:rgba(255,255,255,.08); --warm:#322c20; --danger:#d98078;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{text-wrap:balance;line-height:1.3}
+a{color:var(--accent)}
+button{font-family:inherit}
+
+/* header */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);
+  z-index:21;background:var(--bg)}
+.topbar-in{max-width:var(--maxw);margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:10px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;flex-direction:column;gap:1px;min-width:0}
+.brand b{font-family:var(--serif);font-weight:600;font-size:1.02rem;letter-spacing:-.01em}
+.brand span{font-size:.68rem;color:var(--fg-faint);letter-spacing:.04em}
+.spacer{flex:1}
+.icon-btn{appearance:none;border:1px solid var(--border);background:var(--surface);
+  color:var(--fg-muted);width:38px;height:38px;border-radius:10px;cursor:pointer;
+  font-size:1.05rem;display:grid;place-items:center}
+.icon-btn:hover{border-color:var(--border-strong);color:var(--fg)}
+
+/* tab bar */
+.tabs{max-width:var(--maxw);margin:0 auto;display:flex;gap:4px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px}
+.tab{appearance:none;border:0;background:transparent;color:var(--fg-muted);
+  font-size:.86rem;font-weight:500;padding:7px 13px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+
+/* page wrap */
+main{max-width:var(--maxw);margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 72px}
+
+/* back link */
+.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;
+  color:var(--fg-muted);font-size:.84rem;cursor:pointer;padding:4px 0;margin-bottom:12px}
+.back:hover{color:var(--accent)}
+
+/* home intro */
+.intro{margin-bottom:22px}
+.intro .ey{font-size:.74rem;color:var(--fg-faint);letter-spacing:.04em}
+.intro h1{font-family:var(--serif);font-weight:700;font-size:1.7rem;margin:.25em 0 .35em;letter-spacing:-.02em}
+.intro p{color:var(--fg-muted);font-size:.9rem;margin:0;max-width:60ch}
+
+/* tool cards */
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{display:flex;gap:14px;align-items:flex-start;text-align:left;width:100%;
+  background:var(--surface);border:1px solid var(--border);border-radius:15px;
+  padding:15px 16px;cursor:pointer;color:inherit;transition:border-color .12s,transform .12s}
+.card:hover{border-color:var(--card-accent,var(--border-strong));transform:translateY(-1px)}
+.dot{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+  background:var(--card-accent-soft);color:var(--card-accent);font-family:var(--serif);font-weight:700;font-size:1.1rem}
+.card-body{min-width:0;flex:1}
+.card-body h3{margin:0 0 3px;font-size:1.02rem;font-weight:600}
+.card-body p{margin:0;font-size:.8rem;color:var(--fg-muted);line-height:1.5}
+.prog{flex:none;font-size:.72rem;color:var(--fg-faint);font-variant-numeric:tabular-nums;
+  align-self:center;white-space:nowrap}
+
+/* tool header + chapter list */
+.toolhead{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.toolhead h1{font-family:var(--serif);font-size:1.45rem;font-weight:700;margin:.1em 0 .1em;color:var(--accent)}
+.toolhead .en{font-size:.82rem;color:var(--fg-faint);font-style:italic}
+.toolhead .sub{font-size:.86rem;color:var(--fg-muted);margin:.5em 0 0;max-width:60ch}
+.toolhead .meta{font-size:.74rem;color:var(--fg-faint);margin-top:.7em}
+.chlist{display:flex;flex-direction:column;gap:7px}
+.chrow{display:flex;gap:13px;align-items:center;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:inherit}
+.chrow:hover{border-color:var(--accent)}
+.chnum{flex:none;font-size:.72rem;font-weight:700;color:var(--accent);
+  font-variant-numeric:tabular-nums;min-width:40px}
+.chrow .t{flex:1;min-width:0;font-size:.92rem}
+.chk{flex:none;color:var(--accent);font-size:.95rem;opacity:0;transition:opacity .12s}
+.chk.on{opacity:1}
+
+/* chapter content */
+.chapterhead{margin-bottom:18px}
+.chapterhead .kicker{font-size:.76rem;color:var(--accent);font-weight:600;letter-spacing:.02em}
+.chapterhead h1{font-family:var(--serif);font-size:1.5rem;font-weight:700;margin:.2em 0 0;letter-spacing:-.01em}
+.content{display:flex;flex-direction:column;gap:17px}
+.content h2{font-size:1.06rem;font-weight:700;margin:6px 0 0}
+.content .sub2{font-size:.96rem;font-weight:700;color:var(--accent);margin:4px 0 0}
+.content p.body{margin:0;font-size:.93rem;color:var(--fg);white-space:pre-wrap}
+.content p.cap{margin:0;font-size:.82rem;color:var(--fg-muted)}
+ul.b,ol.n{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+ul.b li,ol.n li{font-size:.9rem}
+ul.b{list-style:none;padding-left:0}
+ul.b li{display:flex;gap:9px}
+ul.b li::before{content:"·";color:var(--accent);font-weight:700;flex:none}
+
+/* cards within content */
+.box{border-radius:13px;padding:14px 15px}
+.box.def{background:var(--accent-soft)}
+.box.def .term{font-weight:700;color:var(--accent);font-size:.9rem;margin-bottom:5px;display:flex;gap:7px;align-items:center}
+.box.def .term::before{content:"❖";font-size:.8rem}
+.box.def .bd{font-size:.86rem;white-space:pre-wrap;color:var(--fg)}
+.box.ex{background:var(--warm)}
+.box.ex .term{font-weight:700;color:#8a6d1f;font-size:.86rem;margin-bottom:5px}
+:root[data-theme="dark"] .box.ex .term,
+:root:not([data-theme="light"]) .box.ex .term{color:#d8b968}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .box.ex .term{color:#d8b968}}
+.box.ex .bd{font-size:.84rem;color:var(--fg-muted);white-space:pre-wrap}
+.tr{border:1px solid var(--accent-soft);background:var(--accent-soft);border-radius:13px;padding:14px 15px;
+  display:flex;flex-direction:column;gap:8px}
+.tr .trh{font-weight:700;color:var(--accent);font-size:.86rem}
+.tr .ln{display:flex;gap:9px;font-size:.84rem}
+.tr .sp{flex:none;min-width:64px;font-weight:700;color:var(--accent);font-size:.78rem}
+.tr .nar{font-style:italic;color:var(--fg-muted);font-size:.82rem}
+.tr .note{color:var(--accent);font-size:.8rem;margin-top:2px}
+
+/* interactive */
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:.88rem;font-weight:500}
+textarea,.rowinput{width:100%;background:var(--surface);color:var(--fg);
+  border:1px solid var(--border-strong);border-radius:10px;padding:10px;font:inherit;font-size:.88rem;resize:vertical}
+textarea:focus,.rowinput:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.checklist{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:9px}
+.checklist .cltitle{font-weight:700;color:var(--accent);font-size:.86rem}
+.ck{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:.88rem}
+.ck input{margin-top:3px;accent-color:var(--accent);width:17px;height:17px;flex:none}
+.scale{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:8px}
+.scale .sh{display:flex;justify-content:space-between;align-items:center}
+.scale .sh .lb{font-size:.88rem;font-weight:500}
+.scale .sh .val{font-family:var(--serif);font-weight:700;font-size:1.3rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.scale input[type=range]{width:100%;accent-color:var(--accent)}
+.scale .ends{display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg-faint)}
+.rows{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:10px}
+.rows .rtitle{font-weight:700;color:var(--accent);font-size:.86rem}
+.row{display:flex;gap:10px;align-items:flex-start}
+.row .rl{flex:none;font-weight:700;color:var(--accent);font-size:.86rem;min-width:70px;padding-top:9px}
+
+/* resources + about */
+.sec{margin-bottom:24px}
+.sec h2{font-family:var(--serif);font-size:1.15rem;font-weight:700;margin:0 0 4px}
+.sec>.lead{font-size:.86rem;color:var(--fg-muted);margin:0 0 12px;max-width:60ch}
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:9px}
+.rc .ti{font-weight:600;font-size:.9rem}
+.rc .inst{font-size:.78rem;color:var(--fg-muted);margin-top:2px}
+.rc .em{font-size:.82rem;margin-top:4px;word-break:break-all}
+.hl{display:flex;gap:13px;align-items:center;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;margin-bottom:9px}
+.hl .hi{flex:none;width:38px;height:38px;border-radius:999px;background:color-mix(in srgb,var(--danger) 16%,transparent);
+  color:var(--danger);display:grid;place-items:center;font-size:1rem}
+.hl .hb{flex:1;min-width:0}
+.hl .hb b{font-size:.92rem}
+.hl .hb p{margin:2px 0 0;font-size:.76rem;color:var(--fg-muted)}
+.hl .num{flex:none;font-weight:700;color:var(--danger);font-variant-numeric:tabular-nums}
+.kv{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.84rem}
+.kv:last-child{border-bottom:0}
+.kv .k{flex:none;width:92px;color:var(--fg-faint)}
+.kv .v{flex:1;min-width:0}
+.note-box{background:var(--surface-2);border-radius:12px;padding:14px;font-size:.8rem;color:var(--fg-muted)}
+.reset{appearance:none;border:1px solid var(--danger);color:var(--danger);background:transparent;
+  border-radius:10px;padding:10px 14px;font-size:.86rem;cursor:pointer;font-weight:600}
+.reset:hover{background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.disclaimer{font-size:.76rem;color:var(--fg-faint);margin-top:28px;padding-top:14px;border-top:1px solid var(--border);text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700&display=swap">
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <b>인권중심 중재기술</b>
+      <span>WHO 퀄리티라이츠 기반 훈련도구</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="themeBtn" title="밝게/어둡게" aria-label="테마 전환">◐</button>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="tools" aria-selected="true">훈련도구</button>
+    <button class="tab" role="tab" data-tab="resources" aria-selected="false">자원</button>
+    <button class="tab" role="tab" data-tab="about" aria-selected="false">정보</button>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<script src="content.js"></script>
+<script>
+"use strict";
+var TOOLS = (window.QR_CONTENT || []);
+
+/* ---- persistence (per-viewer; localStorage) ---- */
+var KEY="qr.web.v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function save(d){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+var store=load();
+if(!store.text)store.text={};if(!store.checks)store.checks={};if(!store.scales)store.scales={};
+var saveT;
+function persist(){clearTimeout(saveT);saveT=setTimeout(function(){save(store)},350)}
+function hasEntry(id){
+  return (store.text[id]&&store.text[id].length>0)||
+         (store.checks[id]&&store.checks[id].length>0)||
+         (store.scales[id]!=null)||
+         Object.keys(store.text).some(function(k){return k.indexOf(id+".")===0&&store.text[k]});
+}
+function chapterDone(ch){return ch.elements.some(function(e){
+  return (e.t==="prompt"||e.t==="checklist"||e.t==="scale"||e.t==="fieldRows")&&
+    (e.t==="fieldRows"?e.rows.some(function(_,i){return store.text[e.id+"."+i]})
+     :e.t==="checklist"?(store.checks[e.id]&&store.checks[e.id].length)
+     :e.t==="scale"?store.scales[e.id]!=null
+     :store.text[e.id]&&store.text[e.id].length);
+})}
+function toolProgress(t){var tot=0,done=0;t.chapters.forEach(function(c){
+  var has=c.elements.some(function(e){return e.t==="prompt"||e.t==="checklist"||e.t==="scale"||e.t==="fieldRows"});
+  if(!has)return;tot++;if(chapterDone(c))done++;});return {done:done,tot:tot};}
+
+/* ---- static resource data ---- */
+var TRAINING=[
+ ["지역기반 네트워크 미팅 (오픈 다이얼로그)","한국 오픈 다이얼로그 학회","mindtrek@hanmail.net"],
+ ["병원기반 네트워크 미팅 (DOTP)","이음병원","eumhospital@naver.com"],
+ ["퀄리티라이츠 리커버리 회복/퇴원계획","아주대학교병원","brainist.cho@gmail.com"],
+ ["고조완화기법 (안정화치료)","천주의성요한병원","nearlord1209@gmail.com"],
+ ["동료지원 지원의사결정","사회적협동조합 우리다움 절차조력사업단","hayosa@naver.com"]];
+var HELP=[
+ ["자살예방 상담전화","109","24시간 자살·정신건강 위기 상담 (전화·문자)"],
+ ["정신건강 위기 상담전화","1577-0199","정신건강 위기 상담 · 지역 정신건강복지센터 연결"],
+ ["한국 생명의 전화","1588-9191","24시간 위기 상담"],
+ ["보건복지상담센터","129","보건복지 위기 대응 상담"],
+ ["국가인권위원회","1331","인권 침해·차별 상담 및 진정"],
+ ["긴급 신고 (경찰)","112","생명이 위급한 응급 상황"],
+ ["응급 의료 (구급)","119","응급 처치가 필요한 신체 위급 상황"]];
+var ATTR=[
+ ["연구개발","세계보건기구 퀄리티라이츠에 기반한 치료친화적 환경조성을 위한 인권중심 중재기술개발"],
+ ["연구기관","아주대학교병원 · 이음병원"],
+ ["연구책임","노재성(아주대) · 정성권(이음병원) · 김성수(연구 코디네이터)"],
+ ["발행처","한국보건산업진흥원 · 아주대학교병원 · 이음병원"],
+ ["발행","2025년 3월 28일"],
+ ["연구지원","보건복지부 보건의료기술 연구개발사업 (RS-2022-KH126432)"]];
+
+/* ---- helpers ---- */
+function h(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+function withAccent(el,hex){el.style.setProperty("--accent",hex);
+  el.style.setProperty("--accent-soft",hexToRgba(hex,document.documentElement.getAttribute("data-theme")==="dark"||isDarkSystem()?0.18:0.12));return el;}
+function isDarkSystem(){return window.matchMedia&&matchMedia("(prefers-color-scheme:dark)").matches&&document.documentElement.getAttribute("data-theme")!=="light";}
+function hexToRgba(hex,a){var n=parseInt(hex.slice(1),16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")";}
+
+/* ---- views ---- */
+var main=document.getElementById("main");
+var tab="tools", view={name:"home"};
+
+function render(){
+  main.innerHTML="";
+  main.style.removeProperty("--accent");main.style.removeProperty("--accent-soft");
+  if(tab==="resources")return renderResources();
+  if(tab==="about")return renderAbout();
+  if(view.name==="home")return renderHome();
+  if(view.name==="tool")return renderTool(view.tool);
+  if(view.name==="chapter")return renderChapter(view.tool,view.chapter);
+}
+
+function renderHome(){
+  var intro=h("div","intro");
+  intro.appendChild(h("div","ey","세계보건기구 퀄리티라이츠에 기반한"));
+  intro.appendChild(h("h1","","치료친화적 환경조성을 위한 인권중심 중재기술"));
+  intro.appendChild(h("p","","정신건강 서비스를 사람중심·권리기반·회복지향으로 바꾸기 위한 다섯 가지 훈련도구입니다. 각 장의 토론·성찰 질문에 적은 내용은 이 브라우저에만 저장됩니다."));
+  main.appendChild(intro);
+  var cards=h("div","cards");
+  TOOLS.forEach(function(t){
+    var c=h("button","card");c.style.setProperty("--card-accent",t.accent);
+    c.style.setProperty("--card-accent-soft",hexToRgba(t.accent,isDarkSystem()?0.2:0.13));
+    var dot=h("div","dot",t.name.slice(0,1));
+    var body=h("div","card-body");body.appendChild(h("h3","",t.name));body.appendChild(h("p","",t.subtitle));
+    c.appendChild(dot);c.appendChild(body);
+    var pr=toolProgress(t);if(pr.tot)c.appendChild(h("div","prog",pr.done+"/"+pr.tot));
+    c.onclick=function(){view={name:"tool",tool:t};scrollTo(0,0);render();};
+    cards.appendChild(c);
+  });
+  main.appendChild(cards);
+  main.appendChild(disclaimer());
+}
+
+function renderTool(t){
+  withAccent(main,t.accent);
+  var back=h("button","back","‹ 훈련도구 전체");back.onclick=function(){view={name:"home"};scrollTo(0,0);render();};
+  main.appendChild(back);
+  var hd=h("div","toolhead");
+  if(t.english)hd.appendChild(h("div","en",t.english));
+  hd.appendChild(h("h1","",t.name));
+  hd.appendChild(h("p","sub",t.subtitle));
+  if(t.leadAuthor&&t.leadAuthor!=="연구팀")hd.appendChild(h("div","meta","대표저자 "+t.leadAuthor+" · "+t.institution));
+  main.appendChild(hd);
+  var list=h("div","chlist");
+  t.chapters.forEach(function(c){
+    var r=h("button","chrow");
+    r.appendChild(h("div","chnum",c.number));
+    r.appendChild(h("div","t",c.title));
+    var chk=h("div","chk"+(chapterDone(c)?" on":""),"✓");r.appendChild(chk);
+    r.onclick=function(){view={name:"chapter",tool:t,chapter:c};scrollTo(0,0);render();};
+    list.appendChild(r);
+  });
+  main.appendChild(list);
+}
+
+function renderChapter(t,c){
+  withAccent(main,t.accent);
+  var back=h("button","back","‹ "+t.name);back.onclick=function(){view={name:"tool",tool:t};scrollTo(0,0);render();};
+  main.appendChild(back);
+  var hd=h("div","chapterhead");
+  hd.appendChild(h("div","kicker",t.name+" · "+c.number));
+  hd.appendChild(h("h1","",c.title));
+  main.appendChild(hd);
+  var box=h("div","content");
+  c.elements.forEach(function(e){box.appendChild(renderEl(e))});
+  main.appendChild(box);
+}
+
+function renderEl(e){
+  if(e.t==="heading")return h("h2","",e.text);
+  if(e.t==="subheading")return h("div","sub2",e.text);
+  if(e.t==="para")return h("p","body",e.text);
+  if(e.t==="caption")return h("p","cap",e.text);
+  if(e.t==="bullets"){var u=h("ul","b");e.items.forEach(function(i){u.appendChild(h("li","",i))});return u;}
+  if(e.t==="numbered"){var o=h("ol","n");e.items.forEach(function(i){o.appendChild(h("li","",i))});return o;}
+  if(e.t==="definition"){var d=h("div","box def");d.appendChild(h("div","term",e.term));d.appendChild(h("div","bd",e.body));return d;}
+  if(e.t==="example"){var x=h("div","box ex");x.appendChild(h("div","term",e.title));x.appendChild(h("div","bd",e.body));return x;}
+  if(e.t==="transcript")return renderTranscript(e);
+  if(e.t==="prompt")return renderPrompt(e);
+  if(e.t==="checklist")return renderChecklist(e);
+  if(e.t==="scale")return renderScale(e);
+  if(e.t==="fieldRows")return renderRows(e);
+  return h("div");
+}
+function renderTranscript(e){
+  var w=h("div","tr");
+  if(e.title)w.appendChild(h("div","trh","💬 "+e.title));
+  e.lines.forEach(function(l){
+    if(l.speaker===">>"||!l.speaker){w.appendChild(h("div","nar",l.text));}
+    else{var ln=h("div","ln");ln.appendChild(h("div","sp",l.speaker));ln.appendChild(h("div",null,l.text));w.appendChild(ln);}
+  });
+  if(e.note)w.appendChild(h("div","note",e.note));
+  return w;
+}
+function renderPrompt(e){
+  var f=h("div","field");var id="p_"+e.id;
+  var lab=h("label","",e.label);lab.htmlFor=id;f.appendChild(lab);
+  var ta=document.createElement("textarea");ta.id=id;ta.rows=Math.max(2,e.lines||2);
+  ta.value=store.text[e.id]||"";ta.placeholder="여기에 적어보세요";
+  ta.oninput=function(){store.text[e.id]=ta.value;persist()};
+  f.appendChild(ta);return f;
+}
+function renderChecklist(e){
+  var w=h("div","checklist");if(e.title)w.appendChild(h("div","cltitle",e.title));
+  var sel=store.checks[e.id]||[];
+  e.items.forEach(function(it,i){
+    var l=h("label","ck");var cb=document.createElement("input");cb.type="checkbox";cb.checked=sel.indexOf(i)>=0;
+    cb.onchange=function(){var s=store.checks[e.id]||[];var p=s.indexOf(i);
+      if(cb.checked&&p<0)s.push(i);else if(!cb.checked&&p>=0)s.splice(p,1);
+      store.checks[e.id]=s;persist()};
+    l.appendChild(cb);l.appendChild(h("span","",it));w.appendChild(l);
+  });return w;
+}
+function renderScale(e){
+  var w=h("div","scale");var head=h("div","sh");head.appendChild(h("div","lb",e.label));
+  var cur=store.scales[e.id]!=null?store.scales[e.id]:e.min;
+  var val=h("div","val",String(cur));head.appendChild(val);w.appendChild(head);
+  var r=document.createElement("input");r.type="range";r.min=e.min;r.max=e.max;r.step=1;r.value=cur;
+  r.oninput=function(){val.textContent=r.value;store.scales[e.id]=+r.value;persist()};
+  w.appendChild(r);
+  var ends=h("div","ends");ends.appendChild(h("span","",e.low));ends.appendChild(h("span","",e.high));w.appendChild(ends);
+  return w;
+}
+function renderRows(e){
+  var w=h("div","rows");if(e.title)w.appendChild(h("div","rtitle",e.title));
+  e.rows.forEach(function(rl,i){
+    var row=h("div","row");row.appendChild(h("div","rl",rl));
+    var ta=document.createElement("textarea");ta.className="rowinput";ta.rows=1;var key=e.id+"."+i;
+    ta.value=store.text[key]||"";ta.oninput=function(){store.text[key]=ta.value;persist()};
+    row.appendChild(ta);w.appendChild(row);
+  });return w;
+}
+
+function renderResources(){
+  var s1=h("div","sec");s1.appendChild(h("h2","","함께 익히고, 서로 연동한다"));
+  s1.appendChild(h("p","lead","이 훈련도구가 지향하는 서비스는 여러 서비스가 동시에 연동하고, 당사자·가족·전문가가 여럿이 함께 익히고 협력할 때 제 기능을 합니다. 아래는 각 도구의 교육을 문의할 수 있는 곳입니다."));
+  TRAINING.forEach(function(r){var c=h("div","rc");c.appendChild(h("div","ti",r[0]));
+    c.appendChild(h("div","inst",r[1]));var em=h("div","em");var a=h("a","",r[2]);a.href="mailto:"+r[2];em.appendChild(a);c.appendChild(em);s1.appendChild(c);});
+  main.appendChild(s1);
+  var s2=h("div","sec");s2.appendChild(h("h2","","위기·인권 상담 전화"));
+  HELP.forEach(function(r){var c=h("div","hl");c.appendChild(h("div","hi","☎"));
+    var b=h("div","hb");b.appendChild(h("b","",r[0]));b.appendChild(h("p","",r[2]));c.appendChild(b);
+    var num=h("div","num");var a=h("a","",r[1]);a.href="tel:"+r[1].replace(/-/g,"");a.style.color="inherit";num.appendChild(a);c.appendChild(num);s2.appendChild(c);});
+  s2.appendChild(h("div","note-box","생명이 위급한 상황이라면 즉시 112(경찰) 또는 119(구급)로 연락하세요."));
+  main.appendChild(s2);
+}
+
+function renderAbout(){
+  var s0=h("div","sec");s0.appendChild(h("h2","","퀄리티라이츠란"));
+  s0.appendChild(h("p","lead","2012년부터 WHO는 정신건강 서비스를 사람중심·권리기반·회복지향으로 바꾸기 위해 퀄리티라이츠(QualityRights)를 진행해 왔습니다. 핵심 원칙은 질병 상황에서도 인간다움을 지키는 ‘개인의 자유에 대한 최소한의 개입’이며, 당사자·가족·치료진이 서로의 인간다움을 존중하며 당사자가 일상으로 돌아가도록 돕는 것입니다."));
+  main.appendChild(s0);
+  var s1=h("div","sec");s1.appendChild(h("h2","","원저작자 표시 (출처)"));
+  var box=h("div","rc");ATTR.forEach(function(kv){var row=h("div","kv");row.appendChild(h("div","k",kv[0]));row.appendChild(h("div","v",kv[1]));box.appendChild(row);});
+  s1.appendChild(box);main.appendChild(s1);
+  var s2=h("div","sec");
+  s2.appendChild(h("div","note-box","이 웹앱은 원저작물(인쇄 매뉴얼)의 텍스트 콘텐츠를 학습 편의를 위해 디지털로 옮긴 2차적 저작물이며, 원저작자 표시를 조건으로 사용됩니다. 모든 콘텐츠의 저작권은 원저작자에게 있습니다. 본 앱은 임상·교육의 보조 도구이며, 전문적 훈련·수퍼비전을 대체하지 않습니다."));
+  main.appendChild(s2);
+  var s3=h("div","sec");var btn=h("button","reset","입력한 내용 전체 초기화");
+  btn.onclick=function(){if(btn.dataset.armed){store={text:{},checks:{},scales:{}};save(store);btn.textContent="초기화되었습니다";}
+    else{btn.dataset.armed="1";btn.textContent="다시 누르면 전체 삭제됩니다";setTimeout(function(){btn.dataset.armed="";btn.textContent="입력한 내용 전체 초기화";},3000);}};
+  s3.appendChild(btn);s3.appendChild(h("p","cap","모든 토론·성찰 답변이 이 브라우저에서 삭제되며 되돌릴 수 없습니다."));
+  main.appendChild(s3);
+}
+
+function disclaimer(){return h("div","disclaimer","원저작 · 아주대학교병원 / 이음병원 · 발행 · 한국보건산업진흥원 (2025)");}
+
+/* ---- tabs + theme ---- */
+Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){
+  b.onclick=function(){tab=b.dataset.tab;
+    document.querySelectorAll(".tab").forEach(function(x){x.setAttribute("aria-selected",x===b?"true":"false")});
+    if(tab==="tools")view={name:"home"};scrollTo(0,0);render();};
+});
+var themeBtn=document.getElementById("themeBtn");
+(function(){try{var t=localStorage.getItem("qr.theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+themeBtn.onclick=function(){
+  var cur=document.documentElement.getAttribute("data-theme");
+  var dark=cur?cur==="dark":isDarkSystem();
+  var next=dark?"light":"dark";document.documentElement.setAttribute("data-theme",next);
+  try{localStorage.setItem("qr.theme",next)}catch(e){}
+  render();
+};
+
+if(!TOOLS.length){main.innerHTML='<p style="color:var(--fg-muted);padding:20px 0">콘텐츠를 불러오지 못했습니다.</p>';}
+else render();
+</script>
