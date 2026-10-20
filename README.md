@@ -65,7 +65,9 @@ web/
 qualityrights/
 ├─ src/                         공통 소스(단일 원본)
 │  ├─ engine/                   앱 공통 엔진 (Model·Store·Theme·Views·공통 Content)
-│  └─ tools/                    도구별 콘텐츠 5종 + 도입 가이드라인
+│  ├─ tools/                    도구별 콘텐츠 5종 + 도입 가이드라인
+│  ├─ figures/                  원본 매뉴얼 도판(그림) — 앱·웹 공용
+│  └─ icons/                    도구별 앱 아이콘 (1024px)
 ├─ tools/
 │  ├─ scaffold.sh              src/ 로부터 5개 iOS 앱을 생성/동기화
 │  ├─ web-content.py           src/ 로부터 웹앱 콘텐츠(content.js) 생성

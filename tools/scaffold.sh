@@ -16,20 +16,20 @@ SRC="$ROOT/src"
 APPS="$ROOT/apps"
 TMPL="$ROOT/tools/project.pbxproj.tmpl"
 
-# app_dir | display_name | bundle_id | content_file | tool_enum
+# app_dir | display_name | bundle_id | content_file | tool_enum | accent_rgb(0-1) | figure_names
 APP_SPECS=(
-  "OpenDialogue|오픈 다이얼로그|kr.go.khidi.qr.opendialogue|OpenDialogueContent.swift|OpenDialogueContent"
-  "DOTP|DOTP 네트워크 미팅|kr.go.khidi.qr.dotp|DOTPContent.swift|DOTPContent"
-  "Stabilization|안정화치료|kr.go.khidi.qr.stabilization|StabilizationContent.swift|StabilizationContent"
-  "Recovery|리커버리|kr.go.khidi.qr.recovery|RecoveryContent.swift|RecoveryContent"
-  "SupportedDecision|지원의사결정|kr.go.khidi.qr.supporteddecision|SupportedDecisionContent.swift|SupportedDecisionContent"
+  "OpenDialogue|오픈 다이얼로그|kr.go.khidi.qr.opendialogue|OpenDialogueContent.swift|OpenDialogueContent|0.24 0.45 0.62|od-network od-interventions"
+  "DOTP|DOTP 네트워크 미팅|kr.go.khidi.qr.dotp|DOTPContent.swift|DOTPContent|0.24 0.52 0.58|dotp-flow"
+  "Stabilization|안정화치료|kr.go.khidi.qr.stabilization|StabilizationContent.swift|StabilizationContent|0.78 0.52 0.24|stab-escalation stab-stages"
+  "Recovery|리커버리|kr.go.khidi.qr.recovery|RecoveryContent.swift|RecoveryContent|0.30 0.56 0.42|recovery-star"
+  "SupportedDecision|지원의사결정|kr.go.khidi.qr.supporteddecision|SupportedDecisionContent.swift|SupportedDecisionContent|0.42 0.40 0.66|sdm-transition"
 )
 
 rm -rf "$APPS"
 mkdir -p "$APPS"
 
 for spec in "${APP_SPECS[@]}"; do
-  IFS='|' read -r DIR DISPLAY BUNDLE CONTENT TOOLENUM <<< "$spec"
+  IFS='|' read -r DIR DISPLAY BUNDLE CONTENT TOOLENUM ACCENT FIGS <<< "$spec"
   echo "→ generating $DIR ($DISPLAY)"
 
   SRCROOT="$APPS/$DIR/$DIR"
@@ -41,8 +41,45 @@ for spec in "${APP_SPECS[@]}"; do
   # 2. this app's tool content
   cp "$SRC/tools/$CONTENT" "$SRCROOT/Content/$CONTENT"
 
-  # 3. assets
+  # 3. assets (base catalog), then per-app accent, app icon, and figures
   cp -R "$SRC/assets" "$SRCROOT/Assets.xcassets"
+  XC="$SRCROOT/Assets.xcassets"
+
+  # 3a. accent colour = this tool's colour
+  read -r AR AG AB <<< "$ACCENT"
+  cat > "$XC/AccentColor.colorset/Contents.json" <<JSON
+{
+  "colors" : [
+    { "idiom" : "universal", "color" : { "color-space" : "srgb",
+      "components" : { "red" : "$AR", "green" : "$AG", "blue" : "$AB", "alpha" : "1.000" } } }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
+JSON
+
+  # 3b. app icon (single 1024 size)
+  cp "$SRC/icons/$DIR.png" "$XC/AppIcon.appiconset/AppIcon.png"
+  cat > "$XC/AppIcon.appiconset/Contents.json" <<JSON
+{
+  "images" : [
+    { "idiom" : "universal", "platform" : "ios", "size" : "1024x1024", "filename" : "AppIcon.png" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
+JSON
+
+  # 3c. manual figures as imagesets
+  for fig in $FIGS; do
+    IMGSET="$XC/$fig.imageset"
+    mkdir -p "$IMGSET"
+    cp "$SRC/figures/$fig.png" "$IMGSET/$fig.png"
+    cat > "$IMGSET/Contents.json" <<JSON
+{
+  "images" : [ { "idiom" : "universal", "filename" : "$fig.png" } ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
+JSON
+  done
 
   # 4. app entry point
   cat > "$SRCROOT/${DIR}App.swift" <<SWIFT
