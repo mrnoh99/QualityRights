@@ -489,3 +489,11 @@ themeBtn.onclick=function(){
 if(!TOOLS.length){main.innerHTML='<p style="color:var(--fg-muted);padding:20px 0">콘텐츠를 불러오지 못했습니다.</p>';}
 else render();
 </script>
+<script>
+/* Offline support: register the service worker (https only; no-ops elsewhere). */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    try { navigator.serviceWorker.register("sw.js").catch(function () {}); } catch (e) {}
+  });
+}
+</script>
