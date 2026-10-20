@@ -13,6 +13,11 @@ struct ChapterView: View {
                 ForEach(Array(chapter.elements.enumerated()), id: \.offset) { _, element in
                     ElementView(element: element, tint: tool.accent)
                 }
+                if let figures = AppFigures.byChapter[chapter.id] {
+                    ForEach(Array(figures.enumerated()), id: \.offset) { _, figure in
+                        FigureCard(figure: figure, tint: tool.accent)
+                    }
+                }
             }
             .padding(20)
         }

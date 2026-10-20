@@ -187,3 +187,37 @@ struct TranscriptView: View {
         )
     }
 }
+
+// MARK: - Manual figure (도판)
+
+/// A diagram cropped from the original printed manual, shown on a white panel
+/// (the images carry a baked-in white background) with a caption.
+struct FigureCard: View {
+    let figure: FigureRef
+    let tint: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("원본 매뉴얼 도판")
+                .font(.caption2.weight(.semibold))
+                .tracking(0.5)
+                .foregroundStyle(.secondary)
+            Image(figure.name)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+                .padding(8)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Color(.separator), lineWidth: 1)
+                )
+            Text(figure.caption)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .qrCard()
+    }
+}
